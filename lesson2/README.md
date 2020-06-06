@@ -17,6 +17,11 @@
 ![](https://github.com/darkjogger/team2/blob/lesson-2/lesson2/revoke_claim.png)
 * 编译成功
 ![](https://github.com/darkjogger/team2/blob/lesson-2/lesson2/compiled.png)
+* 正常出块
+![](https://github.com/darkjogger/team2/blob/lesson-2/lesson2/block.png)
+* 功能演示
+![](https://github.com/darkjogger/team2/blob/lesson-2/lesson2/alice_create_claim.png)
+![](https://github.com/darkjogger/team2/blob/lesson-2/lesson2/alice_revoke_claim.png)
 
 **第二题：为存证模块添加新的功能，**
 
