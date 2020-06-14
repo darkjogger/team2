@@ -12,8 +12,13 @@
 第一题：编写存证模块的单元测试代码，包括：
 
 * 创建存证的测试用例；
-* 撤销存证的测试用例；
+	![](https://github.com/darkjogger/team2/blob/lesson-3/lesson3/test_create_claim.png)
+* 撤销存证的测试用例
+	![](https://github.com/darkjogger/team2/blob/lesson-3/lesson3/test_revoke_claim.png)
 * 转移存证的测试用例；
+	![](https://github.com/darkjogger/team2/blob/lesson-3/lesson3/test_transfer_claim.png)
+* 编译成功
+	![](https://github.com/darkjogger/team2/blob/lesson-3/lesson3/test_compile_succed.png)
 
 第二题：编写存证模块的UI，包括
 
