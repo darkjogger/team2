@@ -15,6 +15,7 @@ function Main (props) {
   const [owner, setOwner] = useState('');
   const [blockNumber, setBlockNumber] = useState(0);
   const [AccountId, setAccountId] = useState('');
+  const [note, setNote] = useState('');
 
   useEffect(() => {
     let unsubscribe;
@@ -45,6 +46,10 @@ function Main (props) {
     fileReader.readAsArrayBuffer(file);
   };
 
+  const handleNoteWriten = (c) => {
+    setNote(c);
+  };
+
   return (
     <Grid.Column width={8}>
       <h1>Proof of Existence Module</h1>
@@ -55,6 +60,16 @@ function Main (props) {
             id='file'
             label='Your File'
             onChange={ (e) => handleFileChosen(e.target.files[0])}
+          />
+        </Form.Field>
+
+        <Form.Field>
+          Note:
+          <Input
+            type='input'
+            id='note'
+            lable='my note'
+            onChange={(e) => handleNoteWriten(e.value)}
           />
         </Form.Field>
 
@@ -76,7 +91,7 @@ function Main (props) {
             attrs={{
               palletRpc: 'poeModule',
               callable: 'createClaim',
-              inputParams: [digest],
+              inputParams: [digest, note],
               paramFields: [true]
             }}
           />
