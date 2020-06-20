@@ -17,6 +17,8 @@ function Main (props) {
   const [AccountId, setAccountId] = useState('');
   const [note, setNote] = useState('');
 
+  const [accountSelected, setAccountSelected] = useState('');
+
   useEffect(() => {
     let unsubscribe;
     api.query.poeModule.proofs(digest, (result) => {
@@ -55,6 +57,30 @@ function Main (props) {
     <Grid.Column width={8}>
       <h1>Proof of Existence Module</h1>
       <Form>
+        <Form.Field>
+          <Input
+            label ='User Address'
+            state='newValue'
+            type='text'
+            onChange={(_, { addr }) => setAccountSelected(addr)}
+          />
+        </Form.Field>
+
+        <Form.Field>
+          <TxButton
+            accountPair={accountPair}
+            label='Query User Doc'
+            setStatus={setStatus}
+            type='SIGNED-TX'
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'QueryUserDoc',
+              inputParams: [accountSelected],
+              paramFields: [true]
+            }}
+          />
+        </Form.Field>
+
         <Form.Field>
           <Input
             type='file'

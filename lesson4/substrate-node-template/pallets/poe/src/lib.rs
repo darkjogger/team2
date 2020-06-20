@@ -35,7 +35,7 @@ decl_storage! {
 	// ---------------------------------vvvvvvvvvvvvvv
 	trait Store for Module<T: Trait> as TemplateModule {
 		Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, Vec<u8>);
-		//AccountHashList get(fn accounthashlist): map hasher(blake2_128_concat) T::AccountId => Vec<(Vec<u8>, T::BlockNumber, Vec<u8>)>;
+		AccountHashList get(fn accounthashlist): map hasher(blake2_128_concat) T::AccountId => Vec<(Vec<u8>, T::BlockNumber, Vec<u8>)>;
 	}
 }
 
@@ -84,6 +84,12 @@ decl_module! {
 			ensure!(T::MaxClaimNoteLength::get() >= note.len() as u32, Error::<T>::ClaimNoteTooLong);
 
 			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), note.clone()));
+
+			let mut list = AccountHashList::<T>::get(sender.clone());
+
+			list.push((claim.clone(), system::Module::<T>::block_number(), note.clone()));
+
+			AccountHashList::<T>::insert(sender.clone(), list);
 
 			Self::deposit_event(RawEvent::ClaimCreated(sender, claim, note));
 
