@@ -47,7 +47,8 @@ function Main (props) {
   };
 
   const handleNoteWriten = (c) => {
-    setNote(c);
+    const hash = blake2AsHex(c, 256);
+    setNote(hash);
   };
 
   return (
