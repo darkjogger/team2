@@ -15,6 +15,9 @@ function Main (props) {
   const [owner, setOwner] = useState('');
   const [blockNumber, setBlockNumber] = useState(0);
   const [AccountId, setAccountId] = useState('');
+  const [note, setNote] = useState('');
+
+  const [accountSelected, setAccountSelected] = useState('');
 
   useEffect(() => {
     let unsubscribe;
@@ -45,16 +48,55 @@ function Main (props) {
     fileReader.readAsArrayBuffer(file);
   };
 
+  const handleNoteWriten = (c) => {
+    const hash = blake2AsHex(c, 256);
+    setNote(hash);
+  };
+
   return (
     <Grid.Column width={8}>
       <h1>Proof of Existence Module</h1>
       <Form>
         <Form.Field>
           <Input
+            label ='User Address'
+            state='newValue'
+            type='text'
+            onChange={(_, { addr }) => setAccountSelected(addr)}
+          />
+        </Form.Field>
+
+        <Form.Field>
+          <TxButton
+            accountPair={accountPair}
+            label='Query User Doc'
+            setStatus={setStatus}
+            type='SIGNED-TX'
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'QueryUserDoc',
+              inputParams: [accountSelected],
+              paramFields: [true]
+            }}
+          />
+        </Form.Field>
+
+        <Form.Field>
+          <Input
             type='file'
             id='file'
             label='Your File'
             onChange={ (e) => handleFileChosen(e.target.files[0])}
+          />
+        </Form.Field>
+
+        <Form.Field>
+          Note:
+          <Input
+            type='input'
+            id='note'
+            lable='my note'
+            onChange={(e) => handleNoteWriten(e.value)}
           />
         </Form.Field>
 
@@ -76,7 +118,7 @@ function Main (props) {
             attrs={{
               palletRpc: 'poeModule',
               callable: 'createClaim',
-              inputParams: [digest],
+              inputParams: [digest, note],
               paramFields: [true]
             }}
           />
