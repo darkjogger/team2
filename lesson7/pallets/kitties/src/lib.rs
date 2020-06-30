@@ -266,14 +266,18 @@ mod tests {
 		type AvailableBlockRatio = AvailableBlockRatio;
 		type Version = ();
 		type ModuleToIndex = ();
-		type AccountData = ();
+		type AccountData = balances::AccountData<u64>;
 		type OnNewAccount = ();
 		type OnKilledAccount = ();
 	}
+
 	impl Trait for Test {
 		type KittyIndex = u32;
 	}
+
 	type OwnedKittiesTest = OwnedKitties<Test>;
+	type KittyLinkedItem = LinkedItem<<Test as Trait>::KittyIndex>;
+	type OwnedKittiesList = LinkedList<OwnedKittiesTest, <Test as system::Trait>::AccountId, <Test as Trait>::KittyIndex>;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
@@ -284,7 +288,7 @@ mod tests {
 	#[test]
 	fn owned_kitties_can_append_values() {
 		new_test_ext().execute_with(|| {
-			OwnedKittiesTest::append(&0, 1);
+			OwnedKittiesList::append(&0, 1);
 
 			assert_eq!(OwnedKittiesTest::get(&(0, None)), Some(KittyLinkedItem {
 				prev: Some(1),
@@ -296,7 +300,7 @@ mod tests {
 				next: None,
 			}));
 
-			OwnedKittiesTest::append(&0, 2);
+			OwnedKittiesList::append(&0, 2);
 
 			assert_eq!(OwnedKittiesTest::get(&(0, None)), Some(KittyLinkedItem {
 				prev: Some(2),
@@ -313,7 +317,7 @@ mod tests {
 				next: None,
 			}));
 
-			OwnedKittiesTest::append(&0, 3);
+			OwnedKittiesList::append(&0, 3);
 
 			assert_eq!(OwnedKittiesTest::get(&(0, None)), Some(KittyLinkedItem {
 				prev: Some(3),
@@ -340,11 +344,11 @@ mod tests {
 	#[test]
 	fn owned_kitties_can_remove_values() {
 		new_test_ext().execute_with(|| {
-			OwnedKittiesTest::append(&0, 1);
-			OwnedKittiesTest::append(&0, 2);
-			OwnedKittiesTest::append(&0, 3);
+			OwnedKittiesList::append(&0, 1);
+			OwnedKittiesList::append(&0, 2);
+			OwnedKittiesList::append(&0, 3);
 
-			OwnedKittiesTest::remove(&0, 2);
+			OwnedKittiesList::remove(&0, 2);
 
 			assert_eq!(OwnedKittiesTest::get(&(0, None)), Some(KittyLinkedItem {
 				prev: Some(3),
@@ -363,7 +367,7 @@ mod tests {
 				next: None,
 			}));
 
-			OwnedKittiesTest::remove(&0, 1);
+			OwnedKittiesList::remove(&0, 1);
 
 			assert_eq!(OwnedKittiesTest::get(&(0, None)), Some(KittyLinkedItem {
 				prev: Some(3),
@@ -379,7 +383,7 @@ mod tests {
 				next: None,
 			}));
 
-			OwnedKittiesTest::remove(&0, 3);
+			OwnedKittiesList::remove(&0, 3);
 
 			assert_eq!(OwnedKittiesTest::get(&(0, None)), Some(KittyLinkedItem {
 				prev: None,
