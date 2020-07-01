@@ -229,6 +229,8 @@ mod tests {
 		traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 	};
 	use frame_system as system;
+	use pallet_randomness_collective_flip as randomness_collective_flip;
+	use pallet_balances as balances;
 
 	impl_outer_origin! {
 		pub enum Origin for Test {}
@@ -271,8 +273,27 @@ mod tests {
 		type OnKilledAccount = ();
 	}
 
+	type Balances = balances::Module<Test>;
+	type RandomnessCollectiveFlip = randomness_collective_flip::Module<Test>;
+	type System = system::Module<Test>;
+
 	impl Trait for Test {
 		type KittyIndex = u32;
+		type Event = ();
+		type Currency = Balances;
+		type Randomness = RandomnessCollectiveFlip;
+	}
+
+	parameter_types! {
+		pub const ExistentialDeposit: u64 = 100;
+	}
+
+	impl pallet_balances::Trait for Test {
+		type Balance = u64;
+		type Event = ();
+		type DustRemoval = ();
+		type ExistentialDeposit = ExistentialDeposit;
+		type AccountStore = System;
 	}
 
 	type OwnedKittiesTest = OwnedKitties<Test>;
