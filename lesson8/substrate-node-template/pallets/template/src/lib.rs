@@ -9,7 +9,7 @@
 /// For more guidance on Substrate FRAME, see the example pallet
 /// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 
-use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch, traits::Get, dispatch::DispatchResult};
+use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch};
 use frame_system::{
 	self as system, ensure_signed,
 	offchain::{
@@ -18,13 +18,12 @@ use frame_system::{
 };
 use sp_std::prelude::*;
 use sp_core::crypto::KeyTypeId;
-use sp_runtime::{
-	transaction_validity::{TransactionPriority,},
-};
-use core::convert::TryInto;
-use parity_scale_codec::{Decode, Encode};
-use sp_std::str;
-
+use core::{convert::TryInto};
+// use parity_scale_codec::{Decode, Encode};
+// use sp_std::str;
+// use sp_runtime::{
+// 	transaction_validity::{TransactionPriority,},
+// };
 #[cfg(test)]
 mod mock;
 
@@ -66,7 +65,7 @@ pub mod crypto {
 
 
 /// The pallet's configuration trait.
-pub trait Trait: syystem::Trait + CreateSignedTransaction<Call<Self>> {
+pub trait Trait: system::Trait + CreateSignedTransaction<Call<Self>> {
 	// Add other types and constants required to configure this pallet.
 
 	// The overarching event type.
@@ -76,8 +75,6 @@ pub trait Trait: syystem::Trait + CreateSignedTransaction<Call<Self>> {
 	type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
 
 	type Call: From<Call<Self>>;
-	/// The type to sign and send transactions.
-	type UnsignedPriority: Get<TransactionPriority>;
 }
 
 // This pallet's storage items.
@@ -189,17 +186,8 @@ impl<T: Trait> Module<T> {
 
 		for (acc, res) in &results {
 			match res {
-				Ok(()) => {
-					debug::native::info!(
-						"off-chain send_signed: acc: {:?}| number: {}",
-						acc.id,
-						submission
-					);
-				}
-				Err(e) => {
-					debug::error!("[{:?}] Failed in signed_submit_number: {:?}", acc.id, e);
-					return Err(<Error<T>>::SignedSubmitNumberError);
-				}
+				Ok(()) => { debug::native::info!("off-chain tx succeeded: number: {}", total); }
+				Err(_e) => { debug::error!("off-chain tx failed: number: {}", total); }
 			};
 		}
 		Ok(())
