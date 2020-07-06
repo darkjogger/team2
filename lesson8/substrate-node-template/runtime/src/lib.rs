@@ -9,7 +9,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use sp_std::prelude::*;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_core::{crypto::KeyTypeId, OpaqueMetadata, Encode};
 use sp_runtime::{
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,
 	transaction_validity::{TransactionValidity, TransactionSource},
@@ -27,7 +27,6 @@ use grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
-use sp_core::Encode;
 
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
@@ -259,24 +258,19 @@ impl sudo::Trait for Runtime {
 
 /// Used for the module template in `./template.rs`
 // ---------------------- Start of offchain Pallet Configurations ----------------------
-
 pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
-
-parameter_types! {
- 	pub const UnsignedPriority: u64 = 100;
-}
 
 impl template::Trait for Runtime {
 	type AuthorityId = template::crypto::TestAuthId;
-	type Call = Call;
 	type Event = Event;
+	type Call = Call;
 }
 
-impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
+impl<LocalCall> system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
 	Call: From<LocalCall>,
 {
-	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+	fn create_transaction<C: system::offchain::AppCrypto<Self::Public, Self::Signature>>(
 		call: Call,
 		public: <Signature as sp_runtime::traits::Verify>::Signer,
 		account: AccountId,
@@ -290,13 +284,14 @@ where
 			.saturated_into::<u64>()
 			.saturating_sub(1);
 		let tip = 0;
+
 		let extra: SignedExtra = (
-			frame_system::CheckTxVersion::<Runtime>::new(),
-			frame_system::CheckGenesis::<Runtime>::new(),
-			frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
-			frame_system::CheckNonce::<Runtime>::from(index),
-			frame_system::CheckWeight::<Runtime>::new(),
-			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+			system::CheckTxVersion::<Runtime>::new(),
+			system::CheckGenesis::<Runtime>::new(),
+			system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
+			system::CheckNonce::<Runtime>::from(index),
+			system::CheckWeight::<Runtime>::new(),
+			transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
 		);
 
 		#[cfg_attr(not(feature = "std"), allow(unused_variables))]
@@ -314,12 +309,12 @@ where
 	}
 }
 
-impl frame_system::offchain::SigningTypes for Runtime {
+impl system::offchain::SigningTypes for Runtime {
 	type Public = <Signature as sp_runtime::traits::Verify>::Signer;
 	type Signature = Signature;
 }
 
-impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
+impl<C> system::offchain::SendTransactionTypes<C> for Runtime
 where
 	Call: From<C>,
 {
@@ -327,7 +322,9 @@ where
 	type Extrinsic = UncheckedExtrinsic;
 }
 
+
 // ---------------------- End of offchain Pallet Configurations ----------------------
+
 
 construct_runtime!(
 	pub enum Runtime where
@@ -360,7 +357,6 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
-	system::CheckSpecVersion<Runtime>,
 	system::CheckTxVersion<Runtime>,
 	system::CheckGenesis<Runtime>,
 	system::CheckEra<Runtime>,

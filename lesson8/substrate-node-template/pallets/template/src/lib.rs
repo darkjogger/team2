@@ -9,7 +9,9 @@
 /// For more guidance on Substrate FRAME, see the example pallet
 /// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 
-use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch};
+use frame_support::{
+	debug, decl_module, decl_storage, decl_event, decl_error, dispatch
+};
 use frame_system::{
 	self as system, ensure_signed,
 	offchain::{
@@ -19,7 +21,6 @@ use frame_system::{
 use sp_std::prelude::*;
 use sp_core::crypto::KeyTypeId;
 use core::{convert::TryInto};
-// use parity_scale_codec::{Decode, Encode};
 // use sp_std::str;
 // use sp_runtime::{
 // 	transaction_validity::{TransactionPriority,},
@@ -133,7 +134,7 @@ decl_module! {
 		#[weight = 10_000]
 		pub fn save_number(origin, number: u32) -> dispatch::DispatchResult {
 			// Check it was signed and get the signer. See also: ensure_root and ensure_none
-			debug::info!("submit_number_signed: {:?}", number);
+			// debug::info!("submit_number_signed: {:?}", number);
 			let who = ensure_signed(origin)?;
 			/*******
 			 * 学员们在这里追加逻辑
@@ -142,7 +143,7 @@ decl_module! {
 				numbers.push(number);
 			});
 
-			Self::deposit_event(RawEvent::NumberSaved(who, number));
+			Self::deposit_event(RawEvent::NumberSaved(number, who));
 			Ok(())
 		}
 
@@ -152,9 +153,7 @@ decl_module! {
 			/*******
 			 * 学员们在这里追加逻辑
 			 *******/
-			let result = Self::signed_submit_number(block_number);
-
-			if let Err(e) = result { debug::error!("Error: {:?}", e); }
+			Self::signed_submit_number(block_number);
 		}
 
 	}
@@ -162,11 +161,11 @@ decl_module! {
 
 impl<T: Trait> Module<T> {
 
-	fn signed_submit_number(block_number: T::BlockNumber) -> Result<(), Error<T>> {
+	fn signed_submit_number(block_number: T::BlockNumber) {
 		let signer = Signer::<T, T::AuthorityId>::all_accounts();
 		if !signer.can_sign() {
 			debug::error!("No local account available");
-			return Err(<Error<T>>::SignedSubmitNumberError);
+			return;
 		}
 
 		// Using `SubmitSignedTransaction` associated type we create and submit a transaction
@@ -174,12 +173,13 @@ impl<T: Trait> Module<T> {
 		// Submit signed will return a vector of results for all accounts that were found in the
 		// local keystore with expected `KEY_TYPE`.
 		let mut b_number: u32 = block_number.try_into().ok().unwrap() as u32;
-		let mut total = 0;
+		let mut total : u32 = 0;
 		b_number = b_number+1;
 		while b_number != 0 {
 			total = total + b_number * b_number;
 			b_number = b_number -1;
 		}
+
 		let results = signer.send_signed_transaction(|_acct| {
 			Call::save_number(total)
 		});
@@ -190,7 +190,6 @@ impl<T: Trait> Module<T> {
 				Err(_e) => { debug::error!("off-chain tx failed: number: {}", total); }
 			};
 		}
-		Ok(())
 	}
 
 	// fn square_sum(block_number: T::BlockNumber) -> u32 {
